@@ -25,26 +25,30 @@ public class Birthday {
       Random rand = new Random();
       boolean flip = true;
 
+      // Continue with not all gift givers have been thanked
       while (thanked.size() < GIFT_COUNT) {
+        // Random check from minotaur
         if (rand.nextInt(50) == 0) {
           int s = chain.size.get();
           if (s > 0) {
             chain.has(rand.nextInt(s));
           }
-        } else if (flip) {
+        }
+        // positive flip, add item from bag into chain
+        else if (flip) {
           if (bag.size() > 0) {
             Present x = bag.remove(0);
             chain.add(x);
           }
-          flip = !flip;
+          flip = !flip; // flip flop
         }
-        // !flip
+        // negative flip, remove item from chain and thank
         else {
           if (chain.size.get() > 0) {
             Present x = chain.pop(chain.head.next);
             thanked.add(x.id);
           }
-          flip = !flip;
+          flip = !flip; // flip flop
         }
       }
     }
@@ -53,12 +57,15 @@ public class Birthday {
   public static void main(String[] args) {
     long startTime = System.nanoTime();
 
+    // Initialize bag
     for (int i = 1; i <= GIFT_COUNT; i++) {
       bag.add(new Present(i));
     }
 
+    // Shuffle for randomization
     Collections.shuffle(bag);
 
+    // Run servant threads
     Servant[] servants = new Servant[SERVANT_COUNT];
     for (int i = 0; i < SERVANT_COUNT; i++) {
       servants[i] = new Servant();
@@ -72,8 +79,9 @@ public class Birthday {
 
     long endtime = System.nanoTime();
 
-    System.out.println("Servants finished their tasks...");
-    System.out.println("Size of thank you note stack: " + thanked.size());
+    // Output
+    System.out.println("Servant threads finished");
+    System.out.println("Number of thank you notes: " + thanked.size());
     System.out.println("Presents left on chain: " + chain.size.get());
     System.out.println("Total execution time " + (endtime - startTime) / 1_000_000_000.0 + " seconds");
   }
@@ -120,6 +128,7 @@ class PresentChain {
     size = new AtomicInteger(0);
   }
 
+  // Add item to chain
   public void add(Present x) {
     while (true) {
       // Find add position
@@ -157,6 +166,7 @@ class PresentChain {
     }
   }
 
+  // Remove item from chain
   public Present pop(Present x) {
     while (true) {
       // Find pop position
@@ -197,6 +207,7 @@ class PresentChain {
     }
   }
 
+  // Check if chain contains a gift
   public boolean has(int id) {
     Present curr = head;
     while (curr.id < id) {

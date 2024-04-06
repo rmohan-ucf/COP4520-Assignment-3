@@ -1,6 +1,9 @@
 import java.util.*;
 
 public class Temperature {
+    public final static int MAX_TEMP = 70;
+    public final static int MIN_TEMP = -100;
+
     public final static int NUM_THREADS = 8;
     public final static int PAUSE_TIME = 10;
 
@@ -8,9 +11,6 @@ public class Temperature {
     public static List<ArrayList<Integer>> memory;
 
     public static class Sensor extends Thread {
-
-        public final static int MAX_TEMP = 70;
-        public final static int MIN_TEMP = -100;
 
         public boolean hasRead;
         private int id;
@@ -42,8 +42,8 @@ public class Temperature {
         }
 
         while (true) {
+            // run sensor threads
             for (Sensor s : sensors) {
-
                 if (!s.hasRead) {
                     s.start();
                 }
@@ -61,7 +61,7 @@ public class Temperature {
                 }
             }
 
-            // Print output
+            // Print output for current minute
             System.out.printf("Data for minute %-2d:", memory.get(0).size());
             for (ArrayList<Integer> list : memory) {
                 System.out.printf("   %-4d", list.get((list.size() - 1)));
@@ -73,7 +73,7 @@ public class Temperature {
                 return;
             }
 
-            // Sleep to simulate
+            // Sleep to simulate time passage
             try {
                 Thread.sleep(PAUSE_TIME);
             } catch (InterruptedException e) {
@@ -84,12 +84,14 @@ public class Temperature {
 
     public static void output() {
 
+        // Sort to get overall min and max temps
         List<Integer> sortedReadings = new ArrayList<Integer>();
         for (List<Integer> l : memory) {
             sortedReadings.addAll(l);
         }
         Collections.sort(sortedReadings);
 
+        // Get minute by minute min and max data to calculate 10-minute interval diffference
         int[] min = new int[60];
         int[] max = new int[60];
 
@@ -119,6 +121,8 @@ public class Temperature {
                 }
             }
         }
+
+        // Print output
 
         System.out.println("Temperature Report");
         System.out.println("--------------------------------");
